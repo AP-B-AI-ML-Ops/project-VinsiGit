@@ -11,7 +11,7 @@ The training data will be from the starttime when the data gets called, the test
 
 API Documentation: https://earthquake.usgs.gov/fdsnws/event/1/
 
-### example:
+### Example:
 
 starttime:Date = 2023-04-17 \
 endtime:Date = 2024-04-17 \
@@ -37,6 +37,6 @@ Drop unnecessary columns from the database and normalize the data.
 
 Building the basic model for quick testing.
 
-### register flow:
+### Register flow:
 
 Building the model with a gridseach and saving the best model.
