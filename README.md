@@ -4,10 +4,10 @@ Earthquake dataset from https://earthquake.usgs.gov/earthquakes/search/ \
 The data will be called by this link: https://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2023-04-17&endtime=2024-04-17&minmagnitude=2.5&maxmagnitude=5&orderby=time&limit=20000
 
 The minimum magnitude will be 2.5 and the maximum will be 5.0, like this. \
-The end time will be the date when the data gets pulled and the start time will be 1 year before. \
-As only 20000 rows can be pulled from the the limit will be on 20000. This is around 8 months of data.
+The end time will be the date when the data gets pulled, and the start time will be 1 year before. \
+As only, 20000 rows can be pulled from the API, the limit will be on 20000. This is around 8 months of data.
 
-The training data will be from the starttime when the data gets called, the test data will be one year before the starttime and the validation data will be 2 years before the starttime.
+The training data will be from the start time when the data gets called, the test data will be 1 year before the start time and the validation data will be 2 years before the start time.
 
 API Documentation: https://earthquake.usgs.gov/fdsnws/event/1/
 
@@ -21,7 +21,7 @@ limit:Int = 20000
 
 # Explanation:
 
-We will make a XGBClassifier model to predict the magitute based on the latitude and longitude. The user will able to give a location and see what magnitute earthquake would happen at this location.
+We will make a XGBClassifier model to predict the magnitude based on the latitude and longitude. The user will be able to give a location and see what magnitude earthquake would happen at this location.
 
 # Flows & Actions:
 
@@ -29,7 +29,7 @@ We will make a XGBClassifier model to predict the magitute based on the latitude
 
 Will collect 20000 rows from the day when the API call gets made. This data will be stored and used to train and validated the model
 
-### Preproccesing flow:
+### Preprocessing flow:
 
 Drop unnecessary columns from the database and normalize the data.
 
@@ -39,4 +39,4 @@ Building the basic model for quick testing.
 
 ### Register flow:
 
-Building the model with a gridseach and saving the best model.
+Building the model with a grid search and saving the best model.
