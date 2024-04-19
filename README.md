@@ -7,7 +7,12 @@ The minimum magnitude will be 2.5 and the maximum will be 5.0, like this. \
 The end time will be the date when the data gets pulled, and the start time will be 1 year before. \
 As only, 20000 rows can be pulled from the API, the limit will be on 20000. This is around 8 months of data.
 
-The training data will be from the start time when the data gets called, the test data will be 1 year before the start time and the validation data will be 2 years before the start time.
+The training data will be from the start time when the data gets called to 1 year before, the test data will be from 1 year before the training data and the validation data will be 2 years before the training data.
+
+ training data:   2023-04-17 -- 2024-04-17 \
+ test data:       2022-04-17 -- 2023-04-17 \
+ validation data: 2021-04-17 -- 2022-04-17
+
 
 API Documentation: https://earthquake.usgs.gov/fdsnws/event/1/
 
