@@ -17,9 +17,9 @@ services:
     env_file:
         - ../.env
     volumes:
-      - grafana-data-config-datasources:/workspaces/labo-08-teacher-svb/.grafana/datasources
-      - grafana-data-config-dashboards:/workspaces/labo-08-teacher-svb/.grafana/dashboards
-      - grafana-data-dashboards:/workspaces/labo-08-teacher-svb/dashboards
+      - grafana-data-config-datasources:/workspaces/project-VinsiGit/.grafana/datasources
+      - grafana-data-config-dashboards:/workspaces/project-VinsiGit/.grafana/dashboards
+      - grafana-data-dashboards:/workspaces/project-VinsiGit/dashboards
     network_mode: service:db
     command: sleep infinity
 
