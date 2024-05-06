@@ -15,14 +15,14 @@ def dump_pickle(obj, filename: str):
 def read_dataframe(filename: str):
     df = pd.read_csv(filename)
 
-    categorical = ['latitude","longitude']
+    categorical = ['latitude', 'longitude']
     df[categorical] = df[categorical].astype(str)
 
     return df
 
 @task
 def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
-    numerical =  ['latitude","longitude']
+    numerical =  ['latitude', 'longitude']
     dicts = df[numerical].to_dict(orient='records')
     if fit_dv:
         X = dv.fit_transform(dicts)
@@ -35,13 +35,13 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
 def prep_flow(data_path: str, dest_path: str):
     # Load parquet files
     df_train = read_dataframe(
-        os.path.join(data_path, "2024.csv")
+        os.path.join(data_path, "earthquake-2024.csv")
     )
     df_val = read_dataframe(
-        os.path.join(data_path, "2023.csv")
+        os.path.join(data_path, "earthquake-2023.csv")
     )
     df_test = read_dataframe(
-        os.path.join(data_path, "2022.csv")
+        os.path.join(data_path, "earthquake-2022.csv")
     )
 
     # Extract the target

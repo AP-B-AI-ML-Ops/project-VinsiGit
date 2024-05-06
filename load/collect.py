@@ -5,13 +5,18 @@ import urllib.parse
 import urllib.request
 import requests
 from prefect import task, flow
+import pandas as pd
 
 DATALIMIT = 20000
 
 @task
 def generate_query_params(year, limit):
     params = {
-        "": f"starttime={year}-01-01&endtime={year}-12-31&minmagnitude=2.5&maxmagnitude=5&orderby=time",
+        "starttime": f"{year}-01-01",
+        "endtime": f"{year}-12-31",
+        "minmagnitude": 2.5,
+        "maxmagnitude": 5,
+        "orderby": "time",
         "limit": limit
     }
     return params
@@ -24,19 +29,12 @@ def build_query_url(url, params):
 
 @task(retries=4, retry_delay_seconds=2)
 def load_data(url):
-    response= requests.get(url, stream=True)
-
-    response = urllib.request.urlopen(url)
-    data = json.loads(response.read())
+    data = pd.read_csv(url)
     return data
 
 @task
 def save_data(data, filename):
-    fields = data[0].keys()
-    with open(filename, 'w', newline='') as file:
-        csv_writer = csv.DictWriter(file, fields)
-        csv_writer.writeheader()
-        csv_writer.writerows(data)
+    data.to_csv(filename, index=False)
 
 @flow
 def collect_flow(data_path: str):
