@@ -13,18 +13,9 @@ from evidently import ColumnMapping
 import psycopg
 
 load_dotenv()
+NUMERICAL = ["latitude","longitude","mag"]
 
-NUMERICAL = [
-    'passenger_count',
-    'trip_distance',
-    'fare_amount',
-    'total_amount'
-]
-
-CATEGORICAL = [
-    'PULocationID',
-    'DOLocationID'
-]
+CATEGORICAL = []
 
 COL_MAPPING = ColumnMapping(
     prediction='prediction',
@@ -60,7 +51,7 @@ def prep_data():
     with open('models/lin_reg.bin', 'rb') as f_in:
         model = joblib.load(f_in)
     
-    raw_data = pd.read_parquet('data/green_tripdata_2022-02.parquet')
+    raw_data = pd.read_parquet('data/2024.parquet')
 
     return ref_data, model, raw_data
 
@@ -100,8 +91,8 @@ def save_metrics_to_db(cursor, date, prediction_drift, num_drifted_cols, share_m
     
 
 def monitor():
-    startDate = datetime.datetime(2022, 2, 1, 0, 0)
-    endDate = datetime.datetime(2022, 2, 2, 0, 0)
+    startDate = datetime.datetime(2023, 10, 1, 0, 0)
+    endDate = datetime.datetime(2024, 2, 1, 0, 0)
 
     prep_db()
 
@@ -112,8 +103,8 @@ def monitor():
         with conn.cursor() as cursor:
             # get daily data to simulate rides in february
             for i in range(0, 27):
-                current_data = raw_data[(raw_data.lpep_pickup_datetime >= startDate) &
-                                        (raw_data.lpep_pickup_datetime < endDate)]
+                current_data = raw_data[(raw_data.time >= startDate) &
+                                        (raw_data.time < endDate)]
                 
                 prediction_drift, num_drifted_cols, share_missing_vals = calculate_metrics(current_data, model, ref_data)
                 save_metrics_to_db(cursor, startDate, prediction_drift, num_drifted_cols, share_missing_vals)
