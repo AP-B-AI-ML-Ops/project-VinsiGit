@@ -11,3 +11,12 @@ numpy
 scikit-learn
 jupyter
 matplotlib
+mlflow
+seaborn
+hyperopt
+xgboost
+fastparquet
+boto3
+optuna
+threadpoolctl
+botocore
