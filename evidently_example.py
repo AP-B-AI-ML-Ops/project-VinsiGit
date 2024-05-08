@@ -51,7 +51,7 @@ def prep_data():
     with open('models/lin_reg.bin', 'rb') as f_in:
         model = joblib.load(f_in)
     
-    raw_data = pd.read_parquet('data/2024.parquet')
+    raw_data = pd.read_parquet('data/earthquake-2024.parquet') #earthquake-
 
     return ref_data, model, raw_data
 
