@@ -13,7 +13,7 @@ from evidently import ColumnMapping
 import psycopg
 
 load_dotenv()
-NUMERICAL = ["latitude","longitude","mag"]
+NUMERICAL = ["latitude","longitude"]
 
 CATEGORICAL = []
 
@@ -52,11 +52,16 @@ def prep_data():
         model = joblib.load(f_in)
     
     raw_data = pd.read_parquet('data/earthquake-2024.parquet') #earthquake-
+    ref_columns_without_prediction = ref_data.columns.drop('prediction')
+    raw_data = raw_data[ref_columns_without_prediction]
 
     return ref_data, model, raw_data
 
 def calculate_metrics(current_data, model, ref_data):
-    current_data['prediction'] = model.predict(current_data[NUMERICAL + CATEGORICAL].fillna(0))
+    # Ensure that the feature names in current_data match with the features used during model training
+    features = [feature for feature in NUMERICAL + CATEGORICAL if feature in current_data.columns]
+    
+    current_data['prediction'] = model.predict(current_data[features].fillna(0))
 
     report = Report(metrics = [
         ColumnDriftMetric(column_name='prediction'),
@@ -76,8 +81,8 @@ def calculate_metrics(current_data, model, ref_data):
     num_drifted_cols = result['metrics'][1]['result']['number_of_drifted_columns']
     share_missing_vals = result['metrics'][2]['result']['current']['share_of_missing_values']
 
-    return prediction_drift, num_drifted_cols, share_missing_vals
-    
+    return prediction_drift, num_drifted_cols, share_missing_vals    
+
 def save_metrics_to_db(cursor, date, prediction_drift, num_drifted_cols, share_missing_vals):
     cursor.execute("""
     INSERT INTO metrics(
@@ -91,8 +96,8 @@ def save_metrics_to_db(cursor, date, prediction_drift, num_drifted_cols, share_m
     
 
 def monitor():
-    startDate = datetime.datetime(2023, 10, 1, 0, 0)
-    endDate = datetime.datetime(2024, 2, 1, 0, 0)
+    startDate = datetime.datetime(2024, 1, 1, 0, 0)
+    endDate = datetime.datetime(2024, 5, 1, 0, 0)
 
     prep_db()
 
@@ -103,9 +108,8 @@ def monitor():
         with conn.cursor() as cursor:
             # get daily data to simulate rides in february
             for i in range(0, 27):
-                current_data = raw_data[(raw_data.time >= startDate) &
-                                        (raw_data.time < endDate)]
-                
+                # raw_data['time'] = pd.to_datetime(raw_data['time'])
+                current_data = raw_data #[(raw_data.time >= startDate) & (raw_data.time < endDate)]                
                 prediction_drift, num_drifted_cols, share_missing_vals = calculate_metrics(current_data, model, ref_data)
                 save_metrics_to_db(cursor, startDate, prediction_drift, num_drifted_cols, share_missing_vals)
 
