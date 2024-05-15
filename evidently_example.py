@@ -13,19 +13,20 @@ from evidently import ColumnMapping
 import psycopg
 
 load_dotenv()
-NUMERICAL = ["latitude","longitude"]
+NUMERICAL = ["latitude", "longitude"]
 
 CATEGORICAL = []
 
 COL_MAPPING = ColumnMapping(
-    prediction='prediction',
+    prediction="prediction",
     numerical_features=NUMERICAL,
     categorical_features=CATEGORICAL,
-    target=None
+    target=None,
 )
 
 # host, port, user, password
 CONNECT_STRING = f'host={os.getenv("POSTGRES_HOST")} port={os.getenv("POSTGRES_PORT")} user={os.getenv("POSTGRES_USER")} password={os.getenv("POSTGRES_PASSWORD")}'
+
 
 def prep_db():
     create_table_query = """
@@ -43,48 +44,60 @@ def prep_db():
         res = conn.execute("SELECT 1 FROM pg_database WHERE datname='test'")
         if len(res.fetchall()) == 0:
             conn.execute("CREATE DATABASE test;")
-        with psycopg.connect(f'{CONNECT_STRING} dbname=test') as conn:
+        with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
             conn.execute(create_table_query)
 
+
 def prep_data():
-    ref_data = pd.read_parquet('data/reference.parquet')
-    with open('models/lin_reg.bin', 'rb') as f_in:
+    ref_data = pd.read_parquet("data/reference.parquet")
+    with open("models/lin_reg.bin", "rb") as f_in:
         model = joblib.load(f_in)
-    
-    raw_data = pd.read_parquet('data/earthquake-2024.parquet') #earthquake-
-    ref_columns_without_prediction = ref_data.columns.drop('prediction')
+
+    raw_data = pd.read_parquet("data/earthquake-2024.parquet")  # earthquake-
+    ref_columns_without_prediction = ref_data.columns.drop("prediction")
     raw_data = raw_data[ref_columns_without_prediction]
 
     return ref_data, model, raw_data
 
+
 def calculate_metrics(current_data, model, ref_data):
     # Ensure that the feature names in current_data match with the features used during model training
-    features = [feature for feature in NUMERICAL + CATEGORICAL if feature in current_data.columns]
-    
-    current_data['prediction'] = model.predict(current_data[features].fillna(0))
+    features = [
+        feature
+        for feature in NUMERICAL + CATEGORICAL
+        if feature in current_data.columns
+    ]
 
-    report = Report(metrics = [
-        ColumnDriftMetric(column_name='prediction'),
-        DatasetDriftMetric(),
-        DatasetMissingValuesMetric()
-    ])
+    current_data["prediction"] = model.predict(current_data[features].fillna(0))
+
+    report = Report(
+        metrics=[
+            ColumnDriftMetric(column_name="prediction"),
+            DatasetDriftMetric(),
+            DatasetMissingValuesMetric(),
+        ]
+    )
 
     report.run(
-        reference_data=ref_data,
-        current_data=current_data,
-        column_mapping=COL_MAPPING
+        reference_data=ref_data, current_data=current_data, column_mapping=COL_MAPPING
     )
 
     result = report.as_dict()
 
-    prediction_drift = result['metrics'][0]['result']['drift_score']
-    num_drifted_cols = result['metrics'][1]['result']['number_of_drifted_columns']
-    share_missing_vals = result['metrics'][2]['result']['current']['share_of_missing_values']
+    prediction_drift = result["metrics"][0]["result"]["drift_score"]
+    num_drifted_cols = result["metrics"][1]["result"]["number_of_drifted_columns"]
+    share_missing_vals = result["metrics"][2]["result"]["current"][
+        "share_of_missing_values"
+    ]
 
-    return prediction_drift, num_drifted_cols, share_missing_vals    
+    return prediction_drift, num_drifted_cols, share_missing_vals
 
-def save_metrics_to_db(cursor, date, prediction_drift, num_drifted_cols, share_missing_vals):
-    cursor.execute("""
+
+def save_metrics_to_db(
+    cursor, date, prediction_drift, num_drifted_cols, share_missing_vals
+):
+    cursor.execute(
+        """
     INSERT INTO metrics(
         timestamp,
         prediction_drift,
@@ -92,8 +105,10 @@ def save_metrics_to_db(cursor, date, prediction_drift, num_drifted_cols, share_m
         share_missing_values
     )
     VALUES (%s, %s, %s, %s);
-    """, (date, prediction_drift, num_drifted_cols, share_missing_vals))
-    
+    """,
+        (date, prediction_drift, num_drifted_cols, share_missing_vals),
+    )
+
 
 def monitor():
     startDate = datetime.datetime(2024, 1, 1, 0, 0)
@@ -103,15 +118,24 @@ def monitor():
 
     ref_data, model, raw_data = prep_data()
 
-
-    with psycopg.connect(f'{CONNECT_STRING} dbname=test') as conn:
+    with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
         with conn.cursor() as cursor:
             # get daily data to simulate rides in february
             for i in range(0, 27):
                 # raw_data['time'] = pd.to_datetime(raw_data['time'])
-                current_data = raw_data #[(raw_data.time >= startDate) & (raw_data.time < endDate)]                
-                prediction_drift, num_drifted_cols, share_missing_vals = calculate_metrics(current_data, model, ref_data)
-                save_metrics_to_db(cursor, startDate, prediction_drift, num_drifted_cols, share_missing_vals)
+                current_data = raw_data  # [(raw_data.time >= startDate) & (raw_data.time < endDate)]
+                (
+                    prediction_drift,
+                    num_drifted_cols,
+                    share_missing_vals,
+                ) = calculate_metrics(current_data, model, ref_data)
+                save_metrics_to_db(
+                    cursor,
+                    startDate,
+                    prediction_drift,
+                    num_drifted_cols,
+                    share_missing_vals,
+                )
 
                 startDate += datetime.timedelta(1)
                 endDate += datetime.timedelta(1)
@@ -119,5 +143,6 @@ def monitor():
                 time.sleep(1)
                 print("data added")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     monitor()

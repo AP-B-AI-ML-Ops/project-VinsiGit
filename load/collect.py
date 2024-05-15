@@ -9,6 +9,7 @@ import pandas as pd
 
 DATALIMIT = 20000
 
+
 @task
 def generate_query_params(year, limit):
     params = {
@@ -17,30 +18,34 @@ def generate_query_params(year, limit):
         "minmagnitude": 2.5,
         "maxmagnitude": 5,
         "orderby": "time",
-        "limit": limit
+        "limit": limit,
     }
     return params
+
 
 @task
 def build_query_url(url, params):
     query = urllib.parse.urlencode(params)
     url = f"{url}?{query}"
-    return url 
+    return url
+
 
 @task(retries=4, retry_delay_seconds=2)
 def load_data(url):
     data = pd.read_csv(url)
     return data
 
+
 @task
 def save_data(data, filename):
     data.to_csv(filename, index=False)
+
 
 @flow
 def collect_flow(data_path: str):
     os.makedirs(data_path, exist_ok=True)
 
-    url=f"https://earthquake.usgs.gov/fdsnws/event/1/query.csv"
+    url = f"https://earthquake.usgs.gov/fdsnws/event/1/query.csv"
 
     params2022 = generate_query_params(2022, DATALIMIT)
     params2023 = generate_query_params(2023, DATALIMIT)
