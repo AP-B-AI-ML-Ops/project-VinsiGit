@@ -1,12 +1,11 @@
+import mlflow
 from prefect import flow
+
 from load.collect import collect_flow
 from load.prep import prep_flow
-
-from train.train import train_flow
 from train.hpo import hpo_flow
 from train.register import register_flow
-
-import mlflow
+from train.train import train_flow
 
 HPO_EXPERIMENT_NAME = "random-forest-hyperopt"
 REG_EXPERIMENT_NAME = "random-forest-best-models"

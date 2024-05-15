@@ -1,8 +1,8 @@
 import os
 import pickle
-import mlflow
-from prefect import task, flow
 
+import mlflow
+from prefect import flow, task
 from sklearn.ensemble import RandomForestRegressor
 
 

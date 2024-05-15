@@ -1,9 +1,8 @@
 import os
 import pickle
+
 import pandas as pd
-
 from prefect import flow, task
-
 from sklearn.feature_extraction import DictVectorizer
 
 

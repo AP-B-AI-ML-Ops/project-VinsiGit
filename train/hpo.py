@@ -1,11 +1,10 @@
 import os
 import pickle
+
 import mlflow
 import optuna
-
-from prefect import task, flow
-
 from optuna.samplers import TPESampler
+from prefect import flow, task
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 

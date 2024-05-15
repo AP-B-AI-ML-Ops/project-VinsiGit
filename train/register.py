@@ -1,13 +1,12 @@
 import os
 import pickle
-import mlflow
 
+import mlflow
 from mlflow.entities import ViewType
 from mlflow.tracking import MlflowClient
+from prefect import flow, task
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-
-from prefect import task, flow
 
 
 @task

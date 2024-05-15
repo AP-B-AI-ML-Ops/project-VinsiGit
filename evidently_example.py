@@ -1,16 +1,15 @@
 import datetime
-import time
-from dotenv import load_dotenv
 import os
+import time
+
 import joblib
 import pandas as pd
-from evidently.report import Report
-from evidently.metrics import ColumnDriftMetric
-from evidently.metrics import DatasetDriftMetric
-from evidently.metrics import DatasetMissingValuesMetric
-from evidently import ColumnMapping
-
 import psycopg
+from dotenv import load_dotenv
+from evidently import ColumnMapping
+from evidently.metrics import (ColumnDriftMetric, DatasetDriftMetric,
+                               DatasetMissingValuesMetric)
+from evidently.report import Report
 
 load_dotenv()
 NUMERICAL = ["latitude", "longitude"]
