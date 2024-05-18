@@ -1,14 +1,16 @@
 import datetime
 import os
-import time
 
 import joblib
 import pandas as pd
 import psycopg
 from dotenv import load_dotenv
 from evidently import ColumnMapping
-from evidently.metrics import (ColumnDriftMetric, DatasetDriftMetric,
-                               DatasetMissingValuesMetric)
+from evidently.metrics import (
+    ColumnDriftMetric,
+    DatasetDriftMetric,
+    DatasetMissingValuesMetric,
+)
 from evidently.report import Report
 
 load_dotenv()
@@ -24,7 +26,11 @@ COL_MAPPING = ColumnMapping(
 )
 
 # host, port, user, password
-CONNECT_STRING = f'host={os.getenv("POSTGRES_HOST")} port={os.getenv("POSTGRES_PORT")} user={os.getenv("POSTGRES_USER")} password={os.getenv("POSTGRES_PASSWORD")}'
+CONNECT_STRING = f"""
+host={os.getenv("POSTGRES_HOST")}
+port={os.getenv("POSTGRES_PORT")}
+user={os.getenv("POSTGRES_USER")}
+password={os.getenv("POSTGRES_PASSWORD")}"""
 
 
 def prep_db():
@@ -60,7 +66,6 @@ def prep_data():
 
 
 def calculate_metrics(current_data, model, ref_data):
-    # Ensure that the feature names in current_data match with the features used during model training
     features = [
         feature
         for feature in NUMERICAL + CATEGORICAL
@@ -110,7 +115,7 @@ def save_metrics_to_db(
 
 
 def monitor():
-    startDate = datetime.datetime(2024, 1, 1, 0, 0)
+    startDate = datetime.datetime(2023, 1, 1, 0, 0)
     endDate = datetime.datetime(2024, 5, 1, 0, 0)
 
     prep_db()
@@ -120,9 +125,8 @@ def monitor():
     with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
         with conn.cursor() as cursor:
             # get daily data to simulate rides in february
-            for i in range(0, 27):
-                # raw_data['time'] = pd.to_datetime(raw_data['time'])
-                current_data = raw_data  # [(raw_data.time >= startDate) & (raw_data.time < endDate)]
+            for _ in range(0, 27):
+                current_data = raw_data
                 (
                     prediction_drift,
                     num_drifted_cols,
@@ -139,7 +143,7 @@ def monitor():
                 startDate += datetime.timedelta(1)
                 endDate += datetime.timedelta(1)
 
-                time.sleep(1)
+                # time.sleep(1)
                 print("data added")
 
 

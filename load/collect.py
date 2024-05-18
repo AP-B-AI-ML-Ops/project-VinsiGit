@@ -1,11 +1,8 @@
-import csv
-import json
 import os
 import urllib.parse
 import urllib.request
 
 import pandas as pd
-import requests
 from prefect import flow, task
 
 DATALIMIT = 20000
@@ -46,7 +43,7 @@ def save_data(data, filename):
 def collect_flow(data_path: str):
     os.makedirs(data_path, exist_ok=True)
 
-    url = f"https://earthquake.usgs.gov/fdsnws/event/1/query.csv"
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query.csv"
 
     params2022 = generate_query_params(2022, DATALIMIT)
     params2023 = generate_query_params(2023, DATALIMIT)

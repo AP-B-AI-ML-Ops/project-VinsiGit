@@ -2,5 +2,11 @@
 disable = [
     "missing-function-docstring",
     "missing-class-docstring",
-    "C0103"
+    "missing-module-docstring",
+    "C0103",
+    "R0913",
+    "E1129"
 ]
+
+[tool.black]
+line-length=88
