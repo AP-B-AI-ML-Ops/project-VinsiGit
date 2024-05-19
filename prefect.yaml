@@ -3,8 +3,8 @@
 # control along with your flow code.
 
 # Generic metadata about this project
-name: exercise
-prefect-version: 2.16.3
+name: project-VinsiGit
+prefect-version: 2.19.1
 
 # build section allows you to manage and build docker images
 build: null
@@ -19,15 +19,14 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: null
+- name: main_flow
   version: null
   tags: []
   description: null
-  schedule: {}
-  flow_name: null
-  entrypoint: null
+  entrypoint: main.py:main_flow
   parameters: {}
   work_pool:
-    name: null
+    name: mlops
     work_queue_name: null
     job_variables: {}
+  schedules: []

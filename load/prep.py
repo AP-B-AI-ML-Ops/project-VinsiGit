@@ -1,3 +1,12 @@
+# pylint: disable=[invalid-name]
+
+"""
+This module contains tasks and flows for preprocessing earthquake data. 
+It includes tasks for reading dataframes, preprocessing them 
+and dumping the preprocessed data into pickle files. 
+The main flow, `prep_flow`, orchestrates the execution of these tasks.
+"""
+
 import os
 import pickle
 

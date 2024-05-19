@@ -1,0 +1,3 @@
+prefect server start
+prefect worker start --pool mlops --type process
+prefect deploy main.py:main_flow --name 'main_flow' --pool mlops

@@ -1,3 +1,12 @@
+# pylint: disable=[not-context-manager]
+
+"""
+This module contains functions for preparing and monitoring a database for an earthquake prediction model. 
+It includes functions for preparing the database, preparing data, calculating metrics, and saving metrics to the database. 
+The main function, `monitor`, orchestrates the execution of these functions.
+"""
+
+
 import datetime
 import os
 
@@ -22,7 +31,7 @@ COL_MAPPING = ColumnMapping(
     prediction="prediction",
     numerical_features=NUMERICAL,
     categorical_features=CATEGORICAL,
-    target=None,
+    target="mag",  # None,
 )
 
 # host, port, user, password
@@ -58,7 +67,7 @@ def prep_data():
     with open("models/lin_reg.bin", "rb") as f_in:
         model = joblib.load(f_in)
 
-    raw_data = pd.read_parquet("data/earthquake-2024.parquet")  # earthquake-
+    raw_data = pd.read_csv("data/earthquake-2023.csv")  # earthquake-
     ref_columns_without_prediction = ref_data.columns.drop("prediction")
     raw_data = raw_data[ref_columns_without_prediction]
 
@@ -115,8 +124,8 @@ def save_metrics_to_db(
 
 
 def monitor():
-    startDate = datetime.datetime(2023, 1, 1, 0, 0)
-    endDate = datetime.datetime(2024, 5, 1, 0, 0)
+    start_date = datetime.datetime(2023, 1, 1, 0, 0)
+    end_date = datetime.datetime(2024, 5, 1, 0, 0)
 
     prep_db()
 
@@ -125,7 +134,7 @@ def monitor():
     with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
         with conn.cursor() as cursor:
             # get daily data to simulate rides in february
-            for _ in range(0, 27):
+            for _ in range(0, 50):
                 current_data = raw_data
                 (
                     prediction_drift,
@@ -134,14 +143,14 @@ def monitor():
                 ) = calculate_metrics(current_data, model, ref_data)
                 save_metrics_to_db(
                     cursor,
-                    startDate,
+                    start_date,
                     prediction_drift,
                     num_drifted_cols,
                     share_missing_vals,
                 )
 
-                startDate += datetime.timedelta(1)
-                endDate += datetime.timedelta(1)
+                start_date += datetime.timedelta(1)
+                end_date += datetime.timedelta(1)
 
                 # time.sleep(1)
                 print("data added")

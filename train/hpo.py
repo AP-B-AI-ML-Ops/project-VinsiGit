@@ -1,3 +1,5 @@
+# pylint: disable=[missing-module-docstring]
+
 import os
 import pickle
 
@@ -16,7 +18,7 @@ def load_pickle(filename):
 
 
 @task
-def optimize(X_train, y_train, X_val, y_val, num_trials):
+def optimize(x_train, y_train, x_val, y_val, num_trials):
     def objective(trial):
         params = {
             "n_estimators": trial.suggest_int("n_estimators", 10, 50, 1),
@@ -28,9 +30,9 @@ def optimize(X_train, y_train, X_val, y_val, num_trials):
         }
         with mlflow.start_run():
             mlflow.log_params(params)
-            rf = RandomForestRegressor(**params)
-            rf.fit(X_train, y_train)
-            y_pred = rf.predict(X_val)
+            random_forest = RandomForestRegressor(**params)
+            random_forest.fit(x_train, y_train)
+            y_pred = random_forest.predict(x_val)
             rmse = mean_squared_error(y_val, y_pred, squared=False)
             mlflow.log_metric("rmse", rmse)
 
@@ -47,7 +49,7 @@ def hpo_flow(model_path: str, num_trials: int, experiment_name: str):
 
     mlflow.sklearn.autolog(disable=True)
 
-    X_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
-    X_val, y_val = load_pickle(os.path.join(model_path, "val.pkl"))
+    x_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
+    x_val, y_val = load_pickle(os.path.join(model_path, "val.pkl"))
 
-    optimize(X_train, y_train, X_val, y_val, num_trials)
+    optimize(x_train, y_train, x_val, y_val, num_trials)

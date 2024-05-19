@@ -1,3 +1,5 @@
+# pylint: disable=[missing-module-docstring]
+
 import os
 import pickle
 
@@ -13,10 +15,10 @@ def load_pickle(filename: str):
 
 
 @task
-def start_ml_experiment(X_train, y_train):
+def start_ml_experiment(x_train, y_train):
     with mlflow.start_run():
-        rf = RandomForestRegressor(max_depth=10, random_state=0)
-        rf.fit(X_train, y_train)
+        random_forest = RandomForestRegressor(max_depth=10, random_state=0)
+        random_forest.fit(x_train, y_train)
 
 
 @flow
@@ -24,6 +26,6 @@ def train_flow(model_path: str):
     mlflow.set_experiment("random-forest-train")
     mlflow.sklearn.autolog()
 
-    X_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
+    x_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
 
-    start_ml_experiment(X_train, y_train)
+    start_ml_experiment(x_train, y_train)
