@@ -1,14 +1,14 @@
-from train.register import load_pickle, train_and_log_model
-
 import os
 import pickle
 import tempfile
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_regression
-from sklearn.metrics import mean_squared_error
-from sklearn.ensemble import RandomForestRegressor
+
 import mlflow
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+from train.register import load_pickle
 
 
 def test_load_pickle():
@@ -23,11 +23,16 @@ def test_load_pickle():
     assert loaded_data == data
 
     os.remove(filename)
-    
+
+
 def test_train_and_log_model():
     x, y = np.random.rand(100, 10), np.random.rand(100)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.25, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.2, random_state=42
+    )
+    x_train, x_val, y_train, y_val = train_test_split(
+        x_train, y_train, test_size=0.25, random_state=42
+    )
 
     params = {
         "max_depth": 2,
@@ -37,8 +42,9 @@ def test_train_and_log_model():
         "random_state": 42,
         "n_jobs": -1,
     }
+    experiment_id = mlflow.create_experiment("test_experiment")
 
-    with mlflow.start_run():
+    with mlflow.start_run(experiment_id=experiment_id):
         for param in params:
             params[param] = int(params[param])
 
@@ -46,9 +52,13 @@ def test_train_and_log_model():
         random_forest.fit(x_train, y_train)
 
         # Evaluate model on the validation and test sets
-        val_rmse = mean_squared_error(y_val, random_forest.predict(x_val), squared=False)
+        val_rmse = mean_squared_error(
+            y_val, random_forest.predict(x_val), squared=False
+        )
         mlflow.log_metric("val_rmse", val_rmse)
-        test_rmse = mean_squared_error(y_test, random_forest.predict(x_test), squared=False)
+        test_rmse = mean_squared_error(
+            y_test, random_forest.predict(x_test), squared=False
+        )
         mlflow.log_metric("test_rmse", test_rmse)
 
     # Check if a new run has been created
