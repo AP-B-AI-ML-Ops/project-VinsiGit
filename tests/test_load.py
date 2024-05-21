@@ -5,7 +5,7 @@ import tempfile
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
-from load.collect import (build_query_url, generate_query_params)
+from load.collect import build_query_url, generate_query_params
 from load.prep import dump_pickle, preprocess, read_dataframe
 
 

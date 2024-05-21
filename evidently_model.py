@@ -10,16 +10,16 @@ The main function, `monitor`, orchestrates the execution of these functions.
 import datetime
 import os
 
-import joblib
+import pickle
 import pandas as pd
 import psycopg
 from dotenv import load_dotenv
+import mlflow
+from train.register import select_best_model
+
 from evidently import ColumnMapping
-from evidently.metrics import (
-    ColumnDriftMetric,
-    DatasetDriftMetric,
-    DatasetMissingValuesMetric,
-)
+from evidently.metrics import (ColumnDriftMetric, DatasetDriftMetric,
+                               DatasetMissingValuesMetric)
 from evidently.report import Report
 
 load_dotenv()
@@ -62,12 +62,20 @@ def prep_db():
             conn.execute(create_table_query)
 
 
+    
 def prep_data():
-    ref_data = pd.read_parquet("data/reference.parquet")
-    with open("models/lin_reg.bin", "rb") as f_in:
-        model = joblib.load(f_in)
+    # ref_data = pd.read_parquet("data/val.pkl")
+    with open(os.path.join("models", "val.pkl"), 'rb') as f:
+        ref_data = pickle.load(f)
 
-    raw_data = pd.read_csv("data/earthquake-2023.csv")  # earthquake-
+    best_model = select_best_model(top_n=1, experiment_name="xgboost-best-model")
+    run_id = best_model.info.run_id
+    model_uri = f"runs:/{run_id}/model"
+
+    # model_uri = "models:/xgboost-best-model/Production"
+    model = mlflow.pyfunc.load_model(model_uri, name="xgboost-best-model")
+
+    raw_data = pd.read_csv("data/earthquake-train.csv")  # earthquake-
     ref_columns_without_prediction = ref_data.columns.drop("prediction")
     raw_data = raw_data[ref_columns_without_prediction]
 
@@ -125,7 +133,7 @@ def save_metrics_to_db(
 
 def monitor():
     start_date = datetime.datetime(2023, 1, 1, 0, 0)
-    end_date = datetime.datetime(2024, 5, 1, 0, 0)
+    end_date = datetime.datetime(2023, 6, 1, 0, 0)
 
     prep_db()
 
@@ -133,8 +141,7 @@ def monitor():
 
     with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
         with conn.cursor() as cursor:
-            # get daily data to simulate rides in february
-            for _ in range(0, 50):
+            for i in range(0, 30):
                 current_data = raw_data
                 (
                     prediction_drift,
@@ -153,7 +160,7 @@ def monitor():
                 end_date += datetime.timedelta(1)
 
                 # time.sleep(1)
-                print("data added")
+                print(i)
 
 
 if __name__ == "__main__":

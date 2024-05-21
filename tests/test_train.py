@@ -4,7 +4,7 @@ import tempfile
 
 import mlflow
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
@@ -37,8 +37,6 @@ def test_train_and_log_model():
     params = {
         "max_depth": 2,
         "n_estimators": 100,
-        "min_samples_split": 2,
-        "min_samples_leaf": 1,
         "random_state": 42,
         "n_jobs": -1,
     }
@@ -48,17 +46,13 @@ def test_train_and_log_model():
         for param in params:
             params[param] = int(params[param])
 
-        random_forest = RandomForestRegressor(**params)
-        random_forest.fit(x_train, y_train)
+        xgboost = XGBRegressor(**params)
+        xgboost.fit(x_train, y_train)
 
         # Evaluate model on the validation and test sets
-        val_rmse = mean_squared_error(
-            y_val, random_forest.predict(x_val), squared=False
-        )
+        val_rmse = mean_squared_error(y_val, xgboost.predict(x_val), squared=False)
         mlflow.log_metric("val_rmse", val_rmse)
-        test_rmse = mean_squared_error(
-            y_test, random_forest.predict(x_test), squared=False
-        )
+        test_rmse = mean_squared_error(y_test, xgboost.predict(x_test), squared=False)
         mlflow.log_metric("test_rmse", test_rmse)
 
     # Check if a new run has been created

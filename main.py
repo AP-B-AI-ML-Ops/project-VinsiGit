@@ -9,8 +9,8 @@ from train.hpo import hpo_flow
 from train.register import register_flow
 from train.train import train_flow
 
-HPO_EXPERIMENT_NAME = "random-forest-hyperopt"
-REG_EXPERIMENT_NAME = "random-forest-best-models"
+HPO_EXPERIMENT_NAME = "xgboost-hyperopt"
+REG_EXPERIMENT_NAME = "xgboost-best-models"
 
 
 @flow

@@ -9,24 +9,24 @@ As only, 20000 rows can be pulled from the API, the limit will be on 20000. This
 
 The training data will be from the start time when the data gets called to 1 year before, the test data will be from 1 year before the training data and the validation data will be 2 years before the training data.
 
- training data:   2023-04-17 -- 2024-04-17 \
- test data:       2022-04-17 -- 2023-04-17 \
- validation data: 2021-04-17 -- 2022-04-17
+ training data:   2023-01-01 -- 2023-12-31 \
+ test data:       2022-01-01 -- 2022-12-31 \
+ validation data: 2021-01-01 -- 2021-12-31
 
 
 API Documentation: https://earthquake.usgs.gov/fdsnws/event/1/
 
 ### Example:
 
-starttime:Date = 2023-04-17 \
-endtime:Date = 2024-04-17 \
+starttime:Date = 2023-01-01 \
+endtime:Date = 2023-12-31 \
 minmagnitude:Float = 2.5 \
 maxmagnitude:Float = 5 \
 limit:Int = 20000
 
 # Explanation:
 
-We will make a XGBClassifier model to predict the magnitude based on the latitude and longitude. The user will be able to give a location and see what magnitude earthquake would happen at this location.
+We will make a XGBRegressor model to predict the magnitude based on the latitude and longitude. The user will be able to give a location and see what magnitude earthquake would happen at this location.
 
 # Flows & Actions:
 

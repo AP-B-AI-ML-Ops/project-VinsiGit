@@ -5,7 +5,7 @@ import pickle
 
 import mlflow
 from prefect import flow, task
-from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 
 
 @task
@@ -17,15 +17,14 @@ def load_pickle(filename: str):
 @task
 def start_ml_experiment(x_train, y_train):
     with mlflow.start_run():
-        random_forest = RandomForestRegressor(max_depth=10, random_state=0)
-        random_forest.fit(x_train, y_train)
-
+        xgb_regressor = XGBRegressor(max_depth=10, random_state=0)
+        xgb_regressor.fit(x_train, y_train)
 
 @flow
-def train_flow(model_path: str):
-    mlflow.set_experiment("random-forest-train")
+def train_flow(path_to_model: str):
+    mlflow.set_experiment("xgboost-train")
     mlflow.sklearn.autolog()
 
-    x_train, y_train = load_pickle(os.path.join(model_path, "train.pkl"))
+    x_train, y_train = load_pickle(os.path.join(path_to_model, "train.pkl"))
 
     start_ml_experiment(x_train, y_train)

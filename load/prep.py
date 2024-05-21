@@ -45,9 +45,9 @@ def preprocess(df: pd.DataFrame, dv: DictVectorizer, fit_dv: bool = False):
 @flow
 def prep_flow(data_path: str, dest_path: str):
     # Load parquet files
-    df_train = read_dataframe(os.path.join(data_path, "earthquake-2024.csv"))
-    df_val = read_dataframe(os.path.join(data_path, "earthquake-2023.csv"))
-    df_test = read_dataframe(os.path.join(data_path, "earthquake-2022.csv"))
+    df_train = read_dataframe(os.path.join(data_path, "earthquake-train.csv"))
+    df_val = read_dataframe(os.path.join(data_path, "earthquake-val.csv"))
+    df_test = read_dataframe(os.path.join(data_path, "earthquake-test.csv"))
 
     # Extract the target
     target = "mag"

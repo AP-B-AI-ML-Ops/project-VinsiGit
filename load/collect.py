@@ -1,4 +1,3 @@
-
 import os
 import urllib.parse
 import urllib.request
@@ -46,18 +45,18 @@ def collect_flow(data_path: str):
 
     url = "https://earthquake.usgs.gov/fdsnws/event/1/query.csv"
 
-    params2022 = generate_query_params(2022, DATALIMIT)
-    params2023 = generate_query_params(2023, DATALIMIT)
-    params2024 = generate_query_params(2024, DATALIMIT)
+    paramstest = generate_query_params(2021, DATALIMIT)
+    paramsval = generate_query_params(2022, DATALIMIT)
+    paramstrain = generate_query_params(2023, DATALIMIT)
 
-    url2022 = build_query_url(url, params2022)
-    url2023 = build_query_url(url, params2023)
-    url2024 = build_query_url(url, params2024)
+    urltest = build_query_url(url, paramstest)
+    urlval = build_query_url(url, paramsval)
+    urltrain = build_query_url(url, paramstrain)
 
-    data2022 = load_data(url2022)
-    data2023 = load_data(url2023)
-    data2024 = load_data(url2024)
+    datatest = load_data(urltest)
+    dataval = load_data(urlval)
+    datatrain = load_data(urltrain)
 
-    save_data(data2022, os.path.join(data_path, "earthquake-2022.csv"))
-    save_data(data2023, os.path.join(data_path, "earthquake-2023.csv"))
-    save_data(data2024, os.path.join(data_path, "earthquake-2024.csv"))
+    save_data(datatest, os.path.join(data_path, "earthquake-test.csv"))
+    save_data(dataval, os.path.join(data_path, "earthquake-val.csv"))
+    save_data(datatrain, os.path.join(data_path, "earthquake-train.csv"))
