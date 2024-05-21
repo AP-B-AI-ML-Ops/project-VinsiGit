@@ -44,7 +44,6 @@ def optimize(x_train, y_train, x_val, y_val, num_trials):
 @flow
 def hpo_flow(path_to_model: str, num_trials: int, experiment_name: str):
     mlflow.set_experiment(experiment_name)
-
     mlflow.sklearn.autolog(disable=True)
 
     x_train, y_train = load_pickle(os.path.join(path_to_model, "train.pkl"))

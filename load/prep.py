@@ -24,10 +24,6 @@ def dump_pickle(obj, filename: str):
 @task
 def read_dataframe(filename: str):
     df = pd.read_csv(filename)
-
-    categorical = ["latitude", "longitude"]
-    df[categorical] = df[categorical].astype(str)
-
     return df
 
 
@@ -55,6 +51,8 @@ def prep_flow(data_path: str, dest_path: str):
     y_val = df_val[target].values
     y_test = df_test[target].values
 
+    # Keep only "latitude" and "longitude" for train data
+    df_train = df_train[["latitude", "longitude"]]
     # Fit the DictVectorizer and preprocess data
     dv = DictVectorizer()
     X_train, dv = preprocess(df_train, dv, fit_dv=True)
@@ -64,6 +62,8 @@ def prep_flow(data_path: str, dest_path: str):
     # Create dest_path folder unless it already exists
     os.makedirs(dest_path, exist_ok=True)
 
+    print(f"X_train shape: {X_train.shape}")
+    print(f"y_train shape: {y_train.shape}")
     # Save DictVectorizer and datasets
     dump_pickle(dv, os.path.join(dest_path, "dv.pkl"))
     dump_pickle((X_train, y_train), os.path.join(dest_path, "train.pkl"))

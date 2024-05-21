@@ -17,7 +17,7 @@ REG_EXPERIMENT_NAME = "xgboost-best-models"
 def main_flow():
     print("start main flow")
 
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    mlflow.set_tracking_uri("")
 
     collect_flow("./data/")
     prep_flow("./data/", "./models/")

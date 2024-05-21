@@ -7,20 +7,21 @@ The main function, `monitor`, orchestrates the execution of these functions.
 """
 
 
-import datetime
 import os
 
-import pickle
+import mlflow
+import mlflow.pyfunc
 import pandas as pd
 import psycopg
 from dotenv import load_dotenv
-import mlflow
-from train.register import select_best_model
-
 from evidently import ColumnMapping
-from evidently.metrics import (ColumnDriftMetric, DatasetDriftMetric,
-                               DatasetMissingValuesMetric)
+from evidently.metrics import (
+    ColumnDriftMetric,
+    DatasetDriftMetric,
+    DatasetMissingValuesMetric,
+)
 from evidently.report import Report
+from mlflow.tracking import MlflowClient
 
 load_dotenv()
 NUMERICAL = ["latitude", "longitude"]
@@ -46,7 +47,7 @@ def prep_db():
     create_table_query = """
     DROP TABLE IF EXISTS metrics;
     CREATE TABLE metrics(
-        timestamp timestamp,
+        mag float,
         prediction_drift float,
         num_drifted_columns integer,
         share_missing_values float
@@ -62,27 +63,34 @@ def prep_db():
             conn.execute(create_table_query)
 
 
-    
 def prep_data():
     # ref_data = pd.read_parquet("data/val.pkl")
-    with open(os.path.join("models", "val.pkl"), 'rb') as f:
-        ref_data = pickle.load(f)
-
-    best_model = select_best_model(top_n=1, experiment_name="xgboost-best-model")
-    run_id = best_model.info.run_id
-    model_uri = f"runs:/{run_id}/model"
-
-    # model_uri = "models:/xgboost-best-model/Production"
-    model = mlflow.pyfunc.load_model(model_uri, name="xgboost-best-model")
-
+    ref_data = pd.read_csv("data/earthquake-val.csv")  # earthquake-
     raw_data = pd.read_csv("data/earthquake-train.csv")  # earthquake-
-    ref_columns_without_prediction = ref_data.columns.drop("prediction")
-    raw_data = raw_data[ref_columns_without_prediction]
+
+    client = MlflowClient()
+    model_name = "xgboost-best-model"
+    model_version = client.get_latest_versions(model_name, stages=["None"])[0]
+
+    # model_uri = f"models:/{model_name}/{model_version.version}"
+    model_uri = f"models:/{model_name}/{model_version.version}"
+
+    model = mlflow.pyfunc.load_model(model_uri)
+
+    print(ref_data.describe())
+    val_preds = model.predict(ref_data[NUMERICAL])
+    ref_data["prediction"] = val_preds
+
+    val_preds = model.predict(raw_data[NUMERICAL])
+    raw_data["prediction"] = val_preds
+
+    # ref_columns_without_prediction = ref_data.columns.drop("prediction")
+    # raw_data = raw_data[ref_columns_without_prediction]
 
     return ref_data, model, raw_data
 
 
-def calculate_metrics(current_data, model, ref_data):
+def calculate_metrics(ref_data, model, current_data):
     features = [
         feature
         for feature in NUMERICAL + CATEGORICAL
@@ -120,7 +128,7 @@ def save_metrics_to_db(
     cursor.execute(
         """
     INSERT INTO metrics(
-        timestamp,
+        mag,
         prediction_drift,
         num_drifted_columns,
         share_missing_values
@@ -132,8 +140,9 @@ def save_metrics_to_db(
 
 
 def monitor():
-    start_date = datetime.datetime(2023, 1, 1, 0, 0)
-    end_date = datetime.datetime(2023, 6, 1, 0, 0)
+    mlflow.set_tracking_uri("")
+    startMag = 2.5
+    endMag = 2.6
 
     prep_db()
 
@@ -141,23 +150,25 @@ def monitor():
 
     with psycopg.connect(f"{CONNECT_STRING} dbname=test") as conn:
         with conn.cursor() as cursor:
-            for i in range(0, 30):
-                current_data = raw_data
+            for i in range(0, 24):
+                current_data = raw_data[
+                    (raw_data.mag >= startMag) & (raw_data.mag < endMag)
+                ]
                 (
                     prediction_drift,
                     num_drifted_cols,
                     share_missing_vals,
-                ) = calculate_metrics(current_data, model, ref_data)
+                ) = calculate_metrics(ref_data, model, current_data)
                 save_metrics_to_db(
                     cursor,
-                    start_date,
+                    startMag,
                     prediction_drift,
                     num_drifted_cols,
                     share_missing_vals,
                 )
 
-                start_date += datetime.timedelta(1)
-                end_date += datetime.timedelta(1)
+                startMag += 0.1
+                endMag += 0.1
 
                 # time.sleep(1)
                 print(i)

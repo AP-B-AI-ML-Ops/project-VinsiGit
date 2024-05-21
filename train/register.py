@@ -88,7 +88,19 @@ def register_flow(
     # Select the model with the lowest test RMSE
     best_run = select_best_model(top_n, experiment_name)
 
-    # Register the best model
-    run_id = best_run.info.run_id
+    best_params = best_run.data.params
+    model = XGBRegressor(**best_params)
+
+    # Fit your model
+    model.fit(x_train, y_train)
+    # model.fit(x_train, y_train)
+
+    with mlflow.start_run() as run:
+        # Log the model
+        mlflow.xgboost.log_model(model, "model")
+
+        # Get the run ID of the current run
+        run_id = run.info.run_id
+
     model_uri = f"runs:/{run_id}/model"
     mlflow.register_model(model_uri, name="xgboost-best-model")

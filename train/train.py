@@ -20,6 +20,7 @@ def start_ml_experiment(x_train, y_train):
         xgb_regressor = XGBRegressor(max_depth=10, random_state=0)
         xgb_regressor.fit(x_train, y_train)
 
+
 @flow
 def train_flow(path_to_model: str):
     mlflow.set_experiment("xgboost-train")

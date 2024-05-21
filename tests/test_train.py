@@ -4,9 +4,9 @@ import tempfile
 
 import mlflow
 import numpy as np
-from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+from xgboost import XGBRegressor
 
 from train.register import load_pickle
 
