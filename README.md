@@ -3,6 +3,7 @@
 2. Start the MLflow UI with the command: `mlflow ui --backend-store-uri sqlite:///mlflow.db`
 3. Start the Prefect server with the command: `prefect server start`
 4. Run the main flow with the command `python main.py`
+5. Run the evidently script the command `python evidently_model.py`
 
 
 # Dataset:
