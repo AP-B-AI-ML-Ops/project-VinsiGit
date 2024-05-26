@@ -1,4 +1,4 @@
-# pylint: disable=[too-many-arguments,missing-module-docstring]
+# pylint: disable=[too-many-arguments,too-many-locals]
 
 import os
 import pickle

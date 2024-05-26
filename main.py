@@ -1,5 +1,3 @@
-# pylint: disable=[missing-module-docstring]
-
 import mlflow
 from prefect import flow
 
@@ -17,7 +15,7 @@ REG_EXPERIMENT_NAME = "xgboost-best-models"
 def main_flow():
     print("start main flow")
 
-    mlflow.set_tracking_uri("")
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
     collect_flow("./data/")
     prep_flow("./data/", "./models/")

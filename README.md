@@ -1,3 +1,10 @@
+# how do run:
+1. Install the required dependencies by running the command: `pip install -r requirements.txt`
+2. Start the MLflow UI with the command: `mlflow ui --backend-store-uri sqlite:///mlflow.db`
+3. Start the Prefect server with the command: `prefect server start`
+4. Run the main flow with the command `python main.py`
+
+
 # Dataset:
 
 Earthquake dataset from https://earthquake.usgs.gov/earthquakes/search/ \

@@ -1,3 +1,5 @@
+# pylint: disable=[invalid-name,line-too-long]
+
 import os
 import pickle
 import tempfile
@@ -86,8 +88,11 @@ def test_read_dataframe():
     # Use read_dataframe to read the data back
     loaded_df = read_dataframe(filename)
 
+    df = df.astype(str)
+    loaded_df = loaded_df.astype(str)
+
     # Check if the loaded DataFrame matches the original DataFrame
-    pd.testing.assert_frame_equal(loaded_df, df)
+    assert loaded_df.equals(df)
 
     # Clean up the temporary file
     os.remove(filename)

@@ -1,8 +1,10 @@
 # pylint: disable=[not-context-manager]
 
 """
-This module contains functions for preparing and monitoring a database for an earthquake prediction model. 
-It includes functions for preparing the database, preparing data, calculating metrics, and saving metrics to the database. 
+This module contains functions for preparing and
+monitoring a database for an earthquake prediction model. 
+It includes functions for preparing the database, preparing data, 
+calculating metrics, and saving metrics to the database. 
 The main function, `monitor`, orchestrates the execution of these functions.
 """
 
@@ -140,9 +142,9 @@ def save_metrics_to_db(
 
 
 def monitor():
-    mlflow.set_tracking_uri("")
-    startMag = 2.5
-    endMag = 2.6
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    start_mag = 2.5
+    end_mag = 2.6
 
     prep_db()
 
@@ -152,7 +154,7 @@ def monitor():
         with conn.cursor() as cursor:
             for i in range(0, 24):
                 current_data = raw_data[
-                    (raw_data.mag >= startMag) & (raw_data.mag < endMag)
+                    (raw_data.mag >= start_mag) & (raw_data.mag < end_mag)
                 ]
                 (
                     prediction_drift,
@@ -161,14 +163,14 @@ def monitor():
                 ) = calculate_metrics(ref_data, model, current_data)
                 save_metrics_to_db(
                     cursor,
-                    startMag,
+                    start_mag,
                     prediction_drift,
                     num_drifted_cols,
                     share_missing_vals,
                 )
 
-                startMag += 0.1
-                endMag += 0.1
+                start_mag += 0.1
+                end_mag += 0.1
 
                 # time.sleep(1)
                 print(i)
