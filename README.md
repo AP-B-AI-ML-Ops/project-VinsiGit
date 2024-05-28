@@ -1,4 +1,7 @@
-# how do run:
+# Possible git error:
+Some file from grafana get delete when the project gets started in a dev container, restore the file in git to get them back.
+
+# How do run:
 1. Install the required dependencies by running the command: `pip install -r requirements.txt`
 2. Start the MLflow UI with the command: `mlflow ui --backend-store-uri sqlite:///mlflow.db`
 3. Start the Prefect server with the command: `prefect server start`
