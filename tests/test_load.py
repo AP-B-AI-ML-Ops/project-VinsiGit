@@ -7,7 +7,7 @@ import tempfile
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
-from load.collect import build_query_url, generate_query_params
+from load.collect import build_query_url, generate_query_params, load_data
 from load.prep import dump_pickle, preprocess, read_dataframe
 
 
@@ -41,12 +41,9 @@ def test_build_query_url():
     assert actual == expected
 
 
-def test_load_data_ask_teacher():
-    pass
-
-
-def test_save_data_ask_teacher():
-    pass
+def test_load_data():
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2016-01-01&endtime=2016-01-02&minmagnitude=2.5&maxmagnitude=5&orderby=time&limit=20000"
+    assert pd.read_csv(url).equals(load_data(url))
 
 
 def test_dump_pickle():
